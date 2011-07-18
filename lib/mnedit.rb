@@ -59,6 +59,7 @@ class NBTFile::Emitter
 end
 
 class PlaneCounter
+  attr_reader :x, :z
   def initialize
     @x = 0
     @z = 0
@@ -80,6 +81,8 @@ class PlaneCounter
 end
 
 class ChunkCounter
+  attr_reader :x, :y, :z
+
   def initialize
     @y = 0
     @z = 0
@@ -132,18 +135,20 @@ class Region
     end
   end
 
-  def dirtyToGold
+  def convertChunks(&block)
     chunkMetaDataSize = 5
     dummytimestamp = 0
     chunks = []
+    counter = PlaneCounter.new
     bytes[0..4095].each_slice(4) do |ar|
       offset = bytesToInt [0] + ar[0..-2]
       count = ar.last
       if count > 0
-        chunks << chunkToGold(offset)
+        chunks << convertChunk(offset, counter.pos, &block)
       else
         chunks << nil
       end
+      counter.inc
     end
     newBytes = []
     lastVacantPosition = 2
@@ -181,22 +186,53 @@ class Region
     array
   end
 
-  def chunkToGold(offset)
+  def convertChunk(offset, pos, &block)
     o = offset * 4096
     bytecount = bytesToInt bytes[o..(o + 4)]
     o += 5
     nbtBytes = bytes[o..(o + bytecount - 2)]
     offset = o
+    return nbtBytes unless block_given? and block.call(pos)
+    puts "converting: #{pos.inspect}"
     name, body = readnbt nbtBytes
     blocks = body['Level']['Blocks']
+    counter = ChunkCounter.new
     newarray = blocks.value.bytes.map do |b|
-      if 1 <= b and b <= 3
-        41
+      ret = if counter.y == 63
+        35
       else
         b
       end
+      counter.inc
+      ret
     end
     body['Level']['Blocks'] = NBTFile::Types::ByteArray.new newarray.pack("C*")
+    counter = ChunkCounter.new
+    data = body['Level']['Data']
+    dataArray = data.value.bytes.map do |b|
+      head = b >> 4
+      tail = b & 0xF
+      tailpos = counter.pos
+      counter.inc
+      headpos = counter.pos
+      newHead = if headpos.first == 63
+        y, z, x = headpos
+        (x + z) % 16
+      else
+        head
+      end
+      newTail = if tailpos.first == 63
+        12
+        y, z, x = tailpos
+        (x + z) % 16
+      else
+        tail
+      end
+      counter.inc
+      (newHead << 4) + newTail
+    end
+    body['Level']['Data'] = NBTFile::Types::ByteArray.new dataArray.pack("C*")
+
     output = StringIO.new
     NBTFile.write(output, name, body)
     out = compress(output.string).byteArray
@@ -219,22 +255,48 @@ class Region
 
   def printNbt(nbtBytes)
     name, body = readnbt nbtBytes
-    blocks = body['Level']['Blocks']
+    blocks = body['Level']['Blocks'].value.bytes.to_a
+    datavalues = body['Level']['Data'].value.bytes.to_a
+    
     counter = ChunkCounter.new
-    blocks.value.bytes.map do |b|
+    puts "-> Blocks x Data"
+    index = 0
+    while index < 32768
+      b = blocks[index]
       name = Block.get(b).name
-      puts "#{counter.pos.inspect}: #{name}"
+      data = datavalues[index / 2]
+      datavalue = if index % 2 == 0
+        data & 0xF
+      else
+        data >> 4
+      end
+      altData = if index % 2 == 1
+        data & 0xF
+      else
+        data >> 4
+      end
+      puts "#{counter.pos.inspect}: #{name}, data = #{datavalue}, altdata = #{altData}"
       counter.inc
+      index += 1
     end
-    puts "-> Entities"
-    entities = body['Level']['Entities']
-    puts entities.to_json
+
+    counter = ChunkCounter.new
+    data = body['Level']['Data']
+    data.value.bytes.each do |b|
+      head = b >> 16
+      tail = b & 0xFFFF
+      puts "data At #{counter.pos.inspect} is #{head}"
+      counter.inc
+      puts "data At #{counter.pos.inspect} is #{tail}"
+      counter.inc
+      puts "!!!the full data is #{b}" if b != 0
+    end
 
     puts "-> Height map"
     heightmap = body['Level']['HeightMap']
     x = 0
     z = 0
-    heightmap.value.bytes.map do |h|
+    heightmap.value.bytes.each do |h|
       puts "At [#{x}, #{z}]: #{h}"
       x += 1
       if x == 16
@@ -280,23 +342,3 @@ class Region
   end
 
 end
-
-puts "Starting"
-reg = '/home/daniel/.minecraft/saves/newone/region/r.0.0.mcr'
-#reg = '/home/daniel/.minecraft/saves/Hacking/region/r.0.0.mcr'
-#Region.new(reg).change(0, 0).change(0, 1).change(1, 1).change(1, 0)
-#Region.new(reg).readChunk 0, 0
-#Region.new(reg).printspecs
-Region.new(reg).dirtyToGold
-
-puts "moved!"
-
-
-#for x in 0..15
-#  for z in 0..15
-#    for y in 0..127
-#      val = y + z * 128 + x * 128 * 16
-#      puts "[#{y}, #{z}, #{x}] -> #{val}"
-#    end
-#  end
-#end
