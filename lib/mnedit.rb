@@ -239,6 +239,16 @@ class Region
     return out
   end
 
+  def getNbt(x, z)
+    o = 4 * (x + z * 32)
+    offset = bytesToInt [0] + bytes[o..(o + 2)]
+    o = offset * 4096
+    bytecount = bytesToInt bytes[o..(o + 4)]
+    o += 5
+    nbtBytes = bytes[o..(o + bytecount - 2)]
+    readnbt nbtBytes
+  end
+
   def readChunk(x, z)
     o = 4 * (x + z * 32)
     offset = bytesToInt [0] + bytes[o..(o + 2)]
@@ -283,8 +293,8 @@ class Region
     counter = ChunkCounter.new
     data = body['Level']['Data']
     data.value.bytes.each do |b|
-      head = b >> 16
-      tail = b & 0xFFFF
+      head = b >> 4
+      tail = b & 0xF
       puts "data At #{counter.pos.inspect} is #{head}"
       counter.inc
       puts "data At #{counter.pos.inspect} is #{tail}"
@@ -304,8 +314,9 @@ class Region
         x = 0
       end
     end
-
-    puts "-> LastUpdate: #{body['Level']['LastUpdate'].value }"
+    l = body['Level']
+    puts "-> LastUpdate: #{l['LastUpdate'].value }"
+    puts "-> Poxes: #{l["zPos"].value}, #{l["xPos"].value}"
   end
 
   def change(x, z)
