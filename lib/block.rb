@@ -19,6 +19,10 @@ class Block < Struct.new :id, :name, :transparent
   end
 
   def self.byName(key)
+    self[key]
+  end
+
+  def self.[](key)
     key = key.to_s
     return @blocks_by_name[key] if @blocks_by_name.has_key?(key)
     raise "no such name: #{key}"

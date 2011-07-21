@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 require 'rubygems'
 require 'active_support'
-require 'nbtfile'
+require 'nbt_helper'
 require 'stringio'
 require 'zlib'
 require 'block'
@@ -44,19 +44,6 @@ class String
   end
 end
 
-class NBTFile::Private::Tokenizer
-  def initialize(io)
-    @gz = io
-    @state = NBTFile::Private::TopTokenizerState.new()
-  end
-end
-
-class NBTFile::Emitter
-  def initialize(stream)
-    @gz = stream
-    @state = NBTFile::Private::TopEmitterState.new()
-  end
-end
 
 class PlaneCounter
   attr_reader :x, :z
