@@ -43,20 +43,19 @@ class Matrix3d
     end
   end
 
+  def fromArray(ar)
+    ar.each_with_index { |obj,i| put i, obj }
+  end
+
+
   def to_a(default = nil)
-    ret = []
-    for z in @data
-      for y in z
-        for x in y
-          if x.nil?
-            ret << default
-          else
-            ret << x
-          end
-        end
+    map do |x|
+      if x.nil?
+        default
+      else
+        x
       end
     end
-    ret
   end
 
   protected
@@ -71,7 +70,7 @@ class Matrix3d
 
   def checkBounds(x, y, z)
     within x, @xlimit
-    within y, @zlimit
+    within y, @ylimit
     within z, @zlimit
   end
 

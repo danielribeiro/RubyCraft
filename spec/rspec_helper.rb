@@ -13,6 +13,22 @@ module MatchHelpers
   end
 end
 
+module RspecDSLExtensions
+  # disable all tests. mark the test to be kept as rit. Useful for debugging tests.
+  def off
+    class << self
+      def ignoredIt(*args)
+
+      end
+
+      alias_method :rit, :it
+      alias_method :it, :ignoredIt
+    end
+  end
+
+end
+
+
 Spec::Matchers.define :contain_same do |*args|
   match do |collection|
     if args.to_set.size != args.size
@@ -55,4 +71,5 @@ end
 
 class Spec::Example::ExampleGroup
   include RspecExtensions
+  extend RspecDSLExtensions
 end

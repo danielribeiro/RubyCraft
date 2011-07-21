@@ -3,11 +3,6 @@ require 'matrix3d'
 
 
 describe Matrix3d do
-
-  def raisesException(nameError = Exception, &block)
-    block.should raise_error(nameError)
-  end
-
   it "should store things correctly" do
     m = Matrix3d.new 2, 3, 4
     m[0, 0, 0] = 'on 0 0 0'
@@ -64,18 +59,27 @@ describe Matrix3d do
     m.to_a(0).should == [0, 1, 0, 3, 0, 0]
   end
 
+  it "can turn an array into a matrix" do
+    m = Matrix3d.new 1, 3, 2
+    m.fromArray([0, 1, 0, 3, 0, 0])
+    m[0, 0, 1].should == 1
+    m[0, 1, 1].should == 3
+  end
+
   it "is enumerable" do
     m = Matrix3d.new 1, 3, 2
     m.put 1, 1
     m.put 3, 3
     ret = m.map do |x|
       unless x.nil?
-      x **2
+        x **2
       else
         0
       end
     end
     ret.should == [0, 1, 0, 9, 0, 0]
   end
+
+
 end
 
