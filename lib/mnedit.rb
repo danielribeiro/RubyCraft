@@ -1,10 +1,9 @@
 #!/usr/bin/env ruby
 require 'rubygems'
 require 'active_support'
-require 'nbt_helper'
 require 'stringio'
 require 'zlib'
-require 'block'
+require 'chunk'
 
 class Integer
   def bytes
@@ -181,7 +180,17 @@ class Region
     offset = o
     return nbtBytes unless block_given? and block.call(pos)
     puts "converting: #{pos.inspect}"
+#    c = Chunk.new readnbt nbtBytes
+#    c.block_type_map do |blockname|
+#      if blockname == :water or blockname == :watersource
+#        :gold
+#      else
+#        blockname
+#      end
+#    end
+
     name, body = readnbt nbtBytes
+
     blocks = body['Level']['Blocks']
     counter = ChunkCounter.new
     newarray = blocks.value.bytes.map do |b|
@@ -219,9 +228,11 @@ class Region
       (newHead << 4) + newTail
     end
     body['Level']['Data'] = NBTFile::Types::ByteArray.new dataArray.pack("C*")
+    newnbt = ["", body]
+
 
     output = StringIO.new
-    NBTFile.write(output, name, body)
+    NBTFile.write(output, "", newnbt)
     out = compress(output.string).byteArray
     return out
   end

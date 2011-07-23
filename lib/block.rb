@@ -28,6 +28,10 @@ class Block < Struct.new :id, :name, :transparent
     raise "no such name: #{key}"
   end
 
+  def is(name)
+    self.name == name.to_s
+  end
+
   transparent_block 0, :air
   block 1, :stone
   block 2, :grass
