@@ -158,18 +158,13 @@ class Region
     name, body = nbtdata
     blocks = body['Level']['Blocks']
     c = Chunk.new nbtdata
-    c.block_map { |b| if b.y == 63 then :wool else b.name end }
-#    counter = ChunkCounter.new
-#    newarray = blocks.value.bytes.map do |b|
-#      ret = if counter.y == 63
-#        35
-#      else
-#        b
-#      end
-#      counter.inc
-#      ret
-#    end
-#    body['Level']['Blocks'] = NBTFile::Types::ByteArray.new newarray.pack("C*")
+    c.block_map do |b|
+      if b.y == 63
+        :wool
+      else
+        b.name
+      end
+    end
     counter = ChunkCounter.new
     data = body['Level']['Data']
     dataArray = data.value.bytes.map do |b|

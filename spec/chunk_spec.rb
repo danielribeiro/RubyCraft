@@ -19,13 +19,17 @@ describe Chunk do
     Chunk.new(["", level])
   end
 
+  def blocksAre(chunk, name)
+    chunkName, newData = chunk.export
+    newData["Level"]["Blocks"].value.should == toByteString([Block[name].id] * 32)
+  end
+
   it "can use to change all block to another type" do
     chunk = createChunk
     chunk.block_map do
       :gold
     end
-    name, newData = chunk.export
-    newData["Level"]["Blocks"].value.should == toByteString([Block[:gold].id] * 32)
+    blocksAre chunk, :gold
   end
 
   it "can iterate over all blocks and change them" do
@@ -37,8 +41,7 @@ describe Chunk do
         :air
       end
     end
-    name, newData = chunk.export
-    newData["Level"]["Blocks"].value.should == toByteString([Block[:gold].id] * 32)
+    blocksAre chunk, :gold
   end
 
   it "can iterate over all blocks while only getting their name as symbol" do
@@ -50,8 +53,7 @@ describe Chunk do
         :air
       end
     end
-    name, newData = chunk.export
-    newData["Level"]["Blocks"].value.should == toByteString([Block[:gold].id] * 32)
+    blocksAre chunk, :gold
   end
 
   it "can iterate over blocks with position data" do
@@ -62,6 +64,15 @@ describe Chunk do
       block.name
     end
     heights.should == [[0, 0, 0], [1, 0, 0], [2, 0, 0], [3, 0, 0], [4, 0, 0]]
+  end
+
+  it "is mutable. Change the blocks on the each method, change export" do
+    chunk = createChunk
+    heights = []
+    chunk.each do |block|
+      block.name = :gold
+    end
+    blocksAre chunk, :gold
   end
 
   #  it "can iterate over planes"

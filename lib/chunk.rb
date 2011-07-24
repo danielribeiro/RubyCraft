@@ -3,8 +3,11 @@
 require 'nbt_helper'
 require 'byte_converter'
 require 'block'
+require 'matrix3d'
 
 class Chunk
+  include Enumerable
+
   def initialize(nbtData)
     name, @nbtBody = nbtData
   end
@@ -20,6 +23,15 @@ class Chunk
 
   def export
     ["", @nbtBody]
+  end
+
+  def each(&block)
+    blocks = @nbtBody["Level"]["Blocks"].value.bytes
+    m = Matrix3d.new(16, 16, 128).fromArray(blocks)
+    newData = []
+
+
+    @nbtBody["Level"]["Blocks"] = NBTFile::Types::ByteArray.new ByteConverter.toByteString newData
   end
 
   protected

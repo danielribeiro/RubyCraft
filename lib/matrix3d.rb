@@ -43,6 +43,18 @@ class Matrix3d
     end
   end
 
+  def each_triple_index(&block)
+    return enum_for:each_triple_index unless block_given?
+    @data.each_with_index do |plane, x|
+      plane.each_with_index do |column, y|
+        column.each_with_index do |value, z|
+          yield value, [x ,y ,z]
+        end
+      end
+    end
+  end
+
+  #Actually from any iterable
   def fromArray(ar)
     ar.each_with_index { |obj,i| put i, obj }
     return self
