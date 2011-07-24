@@ -54,6 +54,16 @@ describe Chunk do
     newData["Level"]["Blocks"].value.should == toByteString([Block[:gold].id] * 32)
   end
 
+  it "can iterate over blocks with position data" do
+    chunk = createChunk
+    heights = []
+    chunk.block_map do |block|
+      heights << block.pos if heights.length < 5
+      block.name
+    end
+    heights.should == [[0, 0, 0], [1, 0, 0], [2, 0, 0], [3, 0, 0], [4, 0, 0]]
+  end
+
   #  it "can iterate over planes"
   #  it "can iterate over lines"
   #  it "can iterate over cubes"

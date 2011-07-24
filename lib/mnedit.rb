@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 require 'rubygems'
 require 'active_support'
+require 'chunk'
 require 'stringio'
 require 'zlib'
-require 'chunk'
 
 class Integer
   def bytes
@@ -66,36 +66,10 @@ class PlaneCounter
 
 end
 
-class ChunkCounter
-  attr_reader :x, :y, :z
-
-  def initialize
-    @y = 0
-    @z = 0
-    @x = 0
-  end
-
-  def inc
-    @y += 1
-    if @y == 128
-      @y = 0
-      @z += 1
-    end
-    if @z == 16
-      @z = 0
-      @x += 1
-    end
-    pos
-  end
-
-  def pos
-    [@y, @z, @x]
-  end
-
-end
 
 class Region
   attr_accessor :bytes
+  attr_accessor :file
 
   def initialize(file)
     @bytes = IO.read(file).byteArray
@@ -180,29 +154,22 @@ class Region
     offset = o
     return nbtBytes unless block_given? and block.call(pos)
     puts "converting: #{pos.inspect}"
-#    c = Chunk.new readnbt nbtBytes
-#    c.block_type_map do |blockname|
-#      if blockname == :water or blockname == :watersource
-#        :gold
-#      else
-#        blockname
-#      end
-#    end
-
-    name, body = readnbt nbtBytes
-
+    nbtdata = readnbt nbtBytes
+    name, body = nbtdata
     blocks = body['Level']['Blocks']
-    counter = ChunkCounter.new
-    newarray = blocks.value.bytes.map do |b|
-      ret = if counter.y == 63
-        35
-      else
-        b
-      end
-      counter.inc
-      ret
-    end
-    body['Level']['Blocks'] = NBTFile::Types::ByteArray.new newarray.pack("C*")
+    c = Chunk.new nbtdata
+    c.block_map { |b| if b.y == 63 then :wool else b.name end }
+#    counter = ChunkCounter.new
+#    newarray = blocks.value.bytes.map do |b|
+#      ret = if counter.y == 63
+#        35
+#      else
+#        b
+#      end
+#      counter.inc
+#      ret
+#    end
+#    body['Level']['Blocks'] = NBTFile::Types::ByteArray.new newarray.pack("C*")
     counter = ChunkCounter.new
     data = body['Level']['Data']
     dataArray = data.value.bytes.map do |b|
@@ -228,11 +195,10 @@ class Region
       (newHead << 4) + newTail
     end
     body['Level']['Data'] = NBTFile::Types::ByteArray.new dataArray.pack("C*")
-    newnbt = ["", body]
-
 
     output = StringIO.new
-    NBTFile.write(output, "", newnbt)
+    name, body = c.export
+    NBTFile.write(output, name ,body)
     out = compress(output.string).byteArray
     return out
   end

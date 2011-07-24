@@ -10,3 +10,5 @@ db
 
 ## Build
 *.gem
+
+fixtures/output.mcr

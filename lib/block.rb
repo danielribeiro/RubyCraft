@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
-class Block < Struct.new :id, :name, :transparent
+
+# A minecraft block. Its position is given by a coord[y, z, x]
+class Block < Struct.new :id, :name, :transparent, :pos, :data
   def self.block(id, name, transparent = false)
     @blocks ||= {}
     @blocks_by_name ||= {}
@@ -14,7 +16,9 @@ class Block < Struct.new :id, :name, :transparent
   end
 
   def self.get(key)
-    return @blocks[key] if @blocks.has_key?(key)
+    if @blocks.has_key?(key)
+      return @blocks[key].clone
+    end
     Block.new(key, "unknown(#{key})", false)
   end
 
@@ -30,6 +34,18 @@ class Block < Struct.new :id, :name, :transparent
 
   def is(name)
     self.name == name.to_s
+  end
+
+  def y
+    pos[0]
+  end
+
+  def z
+    pos[1]
+  end
+
+  def x
+    pos[2]
   end
 
   transparent_block 0, :air

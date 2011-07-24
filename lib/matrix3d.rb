@@ -45,6 +45,7 @@ class Matrix3d
 
   def fromArray(ar)
     ar.each_with_index { |obj,i| put i, obj }
+    return self
   end
 
 
