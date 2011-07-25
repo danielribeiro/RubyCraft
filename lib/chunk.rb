@@ -13,7 +13,6 @@ class Chunk
     bytes = @nbtBody["Level"]["Blocks"].value.bytes
     @blocks = Matrix3d.new(16, 16, 128).fromArray bytes.map {|byte| Block.get(byte) }
     @blocks.each_triple_index do |b, pos|
-      next if b.nil?
       b.pos = pos
     end
   end
@@ -25,6 +24,14 @@ class Chunk
     end
   end
 
+  def [](z, x, y)
+    @blocks[z, x, y]
+  end
+
+  def []=(z, x, y, value)
+    @blocks[z, x, y] = value
+  end
+
   def block_type_map(&block)
     each do |b|
       b.name = yield b.name.to_sym
@@ -32,8 +39,9 @@ class Chunk
   end
 
   def export
-    newData = @blocks.select { |i| i }. map { |b| b.id } # fixme mock this select on the test
-    @nbtBody["Level"]["Blocks"] = NBTFile::Types::ByteArray.new ByteConverter.toByteString newData
+    newData = @blocks.map { |b| b.id }
+    newblocks = NBTFile::Types::ByteArray.new ByteConverter.toByteString newData
+    @nbtBody["Level"]["Blocks"] = newblocks
     ["", @nbtBody]
   end
 

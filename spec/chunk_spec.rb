@@ -45,9 +45,7 @@ describe Chunk do
 
   it "can use to change all block to another type" do
     chunk = createChunk
-    chunk.block_map do
-      :gold
-    end
+    chunk.block_map { :gold }
     blocksAre chunk, :gold
   end
 
@@ -87,14 +85,13 @@ describe Chunk do
 
   it "is mutable. Change the blocks on the each method, change export" do
     chunk = createChunk
-    heights = []
     chunk.each do |block|
       block.name = :gold
     end
     blocksAre chunk, :gold
   end
 
-  xit "can change a block given by x, z, y" do
+  it "can change a block given by x, z, y" do
     chunk = createChunk
     chunk[0, 0, 0].name = :gold
     blocksEqual chunk, [:gold] + [:stone] * 31
