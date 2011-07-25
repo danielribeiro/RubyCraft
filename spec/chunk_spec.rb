@@ -2,6 +2,20 @@ require 'rspec_helper'
 require 'chunk'
 require 'block'
 
+# Opening Chunk so that we can test with smaller data set (2x2x8 per chunk),
+#instead of 16x16x128 of regular minecraft chunk
+class Chunk
+  def initialize(nbtData)
+    name, @nbtBody = nbtData
+    bytes = @nbtBody["Level"]["Blocks"].value.bytes
+    @blocks = Matrix3d.new(2, 2, 8).fromArray bytes.map {|byte| Block.get(byte) }
+    @blocks.each_triple_index do |b, pos|
+      next if b.nil?
+      b.pos = pos
+    end
+  end
+end
+
 describe Chunk do
   include ByteConverter
 
@@ -20,8 +34,13 @@ describe Chunk do
   end
 
   def blocksAre(chunk, name)
+    blocksEqual chunk, [name] * 32
+  end
+
+  def blocksEqual(chunk, nameArray)
+    blocks = nameArray.map { |name| Block[name].id }
     chunkName, newData = chunk.export
-    newData["Level"]["Blocks"].value.should == toByteString([Block[name].id] * 32)
+    newData["Level"]["Blocks"].value.should == toByteString(blocks)
   end
 
   it "can use to change all block to another type" do
@@ -63,7 +82,7 @@ describe Chunk do
       heights << block.pos if heights.length < 5
       block.name
     end
-    heights.should == [[0, 0, 0], [1, 0, 0], [2, 0, 0], [3, 0, 0], [4, 0, 0]]
+    heights.should == [[0, 0, 0], [0, 0, 1], [0, 0, 2], [0, 0, 3], [0, 0, 4]]
   end
 
   it "is mutable. Change the blocks on the each method, change export" do
@@ -73,6 +92,12 @@ describe Chunk do
       block.name = :gold
     end
     blocksAre chunk, :gold
+  end
+
+  xit "can change a block given by x, z, y" do
+    chunk = createChunk
+    chunk[0, 0, 0].name = :gold
+    blocksEqual chunk, [:gold] + [:stone] * 31
   end
 
   #  it "can iterate over planes"

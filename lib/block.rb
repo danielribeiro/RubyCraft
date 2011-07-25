@@ -1,11 +1,24 @@
 #!/usr/bin/env ruby
 
-# A minecraft block. Its position is given by a coord[y, z, x]
-class Block < Struct.new :id, :name, :transparent, :pos, :data
+# A minecraft block. Its position is given by a coord[x, z, y]
+class Block
+  attr_accessor :transparent, :pos, :data
+  attr_reader :name, :id
+
+  def initialize(id, name, transparent)
+    @id = id
+    @name = name.to_s
+    @transparent = transparent
+  end
+
+  def clone
+    Block.new id, name, transparent
+  end
+
   def self.block(id, name, transparent = false)
     @blocks ||= {}
     @blocks_by_name ||= {}
-    block = Block.new id, name.to_s, transparent
+    block = Block.new id, name, transparent
     @blocks[id] = block
     @blocks_by_name[name.to_s] = block
 
@@ -36,8 +49,21 @@ class Block < Struct.new :id, :name, :transparent, :pos, :data
     self.name == name.to_s
   end
 
+  #sets name along with id
+  def name=(newName)
+    value = newName.to_s
+    @name = value
+    @id = Block[value].id
+  end
+
+  #sets name along with id
+  def id=(id)
+    @id = id
+    @name = Block.get(id).name
+  end
+
   def y
-    pos[0]
+    pos[2]
   end
 
   def z
@@ -45,7 +71,7 @@ class Block < Struct.new :id, :name, :transparent, :pos, :data
   end
 
   def x
-    pos[2]
+    pos[0]
   end
 
   transparent_block 0, :air

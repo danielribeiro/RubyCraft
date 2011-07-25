@@ -101,6 +101,11 @@ describe Matrix3d do
       [2, [0, 1, 0]], [3, [0, 1, 1]], [4, [0, 2, 0]], [5, [0, 2, 1]]]
   end
 
+  it "can handle other than numbers" do
+    m = Matrix3d.new 1, 3, 2
+    m.fromArray(('a'..'f').to_a)
+    m.to_a.should == ["a", "b", "c", "d", "e", "f"]
+  end
 
 end
 

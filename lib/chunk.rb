@@ -10,44 +10,41 @@ class Chunk
 
   def initialize(nbtData)
     name, @nbtBody = nbtData
+    bytes = @nbtBody["Level"]["Blocks"].value.bytes
+    @blocks = Matrix3d.new(16, 16, 128).fromArray bytes.map {|byte| Block.get(byte) }
+    @blocks.each_triple_index do |b, pos|
+      next if b.nil?
+      b.pos = pos
+    end
   end
 
   # Converts all blocks on data do another type
   def block_map(&block)
-    mapEachBlock { |b| Block[block.call(b)] }
+    each do |b|
+      b.name = yield b
+    end
   end
 
   def block_type_map(&block)
-    mapEachBlock { |b| Block[block.call(b.name.to_sym)]}
+    each do |b|
+      b.name = yield b.name.to_sym
+    end
   end
 
   def export
+    newData = @blocks.select { |i| i }. map { |b| b.id } # fixme mock this select on the test
+    @nbtBody["Level"]["Blocks"] = NBTFile::Types::ByteArray.new ByteConverter.toByteString newData
     ["", @nbtBody]
   end
 
   def each(&block)
-    blocks = @nbtBody["Level"]["Blocks"].value.bytes
-    m = Matrix3d.new(16, 16, 128).fromArray(blocks)
-    newData = []
-
-
-    @nbtBody["Level"]["Blocks"] = NBTFile::Types::ByteArray.new ByteConverter.toByteString newData
+    @blocks.each &block
   end
 
-  protected
-  def mapEachBlock(&block)
-    counter = ChunkCounter.new
-    newData = @nbtBody["Level"]["Blocks"].value.bytes.map do |byte|
-      b = Block.get(byte)
-      b.pos = counter.posInc
-      block.call(b).id
-    end
-    @nbtBody["Level"]["Blocks"] = NBTFile::Types::ByteArray.new ByteConverter.toByteString newData
-  end
 end
 
 class ChunkCounter
-  attr_reader :x, :y, :z
+  attr_reader :y, :z, :x
 
   def initialize
     @y = 0
