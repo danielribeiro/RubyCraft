@@ -102,8 +102,6 @@ describe Chunk do
   #  it "can iterate over cubes"
   #  it "can iterate over blocks with data"
   #  it "corrects height map"
-  #  it "iterate using either blockname or block full data"
-  #  it "maybe uses block as immutable or as mutable."
 end
 
 

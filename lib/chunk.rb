@@ -17,11 +17,22 @@ class Chunk
     end
   end
 
-  # Converts all blocks on data do another type
+  # Iterates over the blocks
+  def each(&block)
+    @blocks.each &block
+  end
+
+
+  # Converts all blocks on data do another type. Gives the block and sets
+  # the received name
   def block_map(&block)
-    each do |b|
-      b.name = yield b
-    end
+    each { |b| b.name = yield b }
+  end
+
+  # Converts all blocks on data do another type. Gives the block name sets
+  # the received name
+  def block_type_map(&block)
+    each { |b| b.name = yield b.name.to_sym }
   end
 
   def [](z, x, y)
@@ -32,11 +43,7 @@ class Chunk
     @blocks[z, x, y] = value
   end
 
-  def block_type_map(&block)
-    each do |b|
-      b.name = yield b.name.to_sym
-    end
-  end
+
 
   def export
     newData = @blocks.map { |b| b.id }
@@ -45,8 +52,5 @@ class Chunk
     ["", @nbtBody]
   end
 
-  def each(&block)
-    @blocks.each &block
-  end
 
 end
