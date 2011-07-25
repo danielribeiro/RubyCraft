@@ -42,37 +42,3 @@ class Chunk
   end
 
 end
-
-class ChunkCounter
-  attr_reader :y, :z, :x
-
-  def initialize
-    @y = 0
-    @z = 0
-    @x = 0
-  end
-
-  def inc
-    @y += 1
-    if @y == 128
-      @y = 0
-      @z += 1
-    end
-    if @z == 16
-      @z = 0
-      @x += 1
-    end
-    pos
-  end
-
-  def pos
-    [@y, @z, @x]
-  end
-
-  def posInc
-    ret = pos
-    inc
-    ret
-  end
-
-end
