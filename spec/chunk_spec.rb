@@ -5,31 +5,24 @@ require 'block'
 # Opening Chunk so that we can test with smaller data set (2x2x8 per chunk),
 #instead of 16x16x128 of regular minecraft chunk
 class Chunk
-  def initialize(nbtData)
-    name, @nbtBody = nbtData
-    bytes = @nbtBody["Level"]["Blocks"].value.bytes
-    @blocks = Matrix3d.new(2, 2, 8).fromArray bytes.map {|byte| Block.get(byte) }
-    @blocks.each_triple_index do |b, pos|
-      next if b.nil?
-      b.pos = pos
-    end
+  def matrixfromBytes(bytes)
+    Matrix3d.new(2, 2, 8).fromArray bytes.map {|byte| Block.get(byte) }
   end
 end
 
 describe Chunk do
   include ByteConverter
-
   def byteArray(array)
     NBTFile::Types::ByteArray.new toByteString array
   end
 
-  def createChunk
+  def createChunk(blockdata = [0] * 16, blocks = [Block[:stone].id] * 32)
     level = NBTFile::Types::Compound.new
     level["Level"] = NBTFile::Types::Compound.new
     data = level["Level"]
     data['HeightMap'] = byteArray [100] * 256
-    data["Blocks"] = byteArray [Block[:stone].id] * 32
-    data["Data"] = byteArray [0] * 16
+    data["Blocks"] = byteArray blocks
+    data["Data"] = byteArray blockdata 
     Chunk.new(["", level])
   end
 
@@ -97,11 +90,35 @@ describe Chunk do
     blocksEqual chunk, [:gold] + [:stone] * 31
   end
 
+  it "can change data as well" do
+    chunk = createChunk
+    chunk.each do |block|
+      block.name = :wool
+      if block.pos == [0, 0, 0]
+        block.data = 5
+      else
+        block.data = 4
+      end
+
+    end
+    blocks = [Block[:wool].id] * 32
+    chunkName, newData = chunk.export
+    newData["Level"]["Blocks"].value.should == toByteString(blocks)
+    newData["Level"]["Data"].value.should == toByteString([(4 << 4) + 5] + [(4 << 4) + 4] * 15)
+  end
+
+  it "can read the data from the levels" do
+    chunk = createChunk([(2 << 4) + 1] * 16)
+    data = chunk.map { |b| b.data }
+    data.should == [1, 2] * 16
+  end
+  
   #  it "can iterate over planes"
   #  it "can iterate over lines"
   #  it "can iterate over cubes"
   #  it "can iterate over blocks with data"
-  #  it "corrects height map"
+  #  it "corrects height map" -> highest nontransparent + 1
+
 end
 
 

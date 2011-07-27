@@ -11,11 +11,21 @@ class Chunk
   def initialize(nbtData)
     name, @nbtBody = nbtData
     bytes = @nbtBody["Level"]["Blocks"].value.bytes
-    @blocks = Matrix3d.new(16, 16, 128).fromArray bytes.map {|byte| Block.get(byte) }
+    @blocks = matrixfromBytes bytes
     @blocks.each_triple_index do |b, pos|
       b.pos = pos
     end
+    data = @nbtBody["Level"]["Data"].value.bytes.to_a
+    @blocks.each_with_index do |b, index|
+      v = data[index / 2]
+      if index % 2 == 0
+        b.data = v & 0xF
+      else
+        b.data = v >> 4
+      end
+    end
   end
+
 
   # Iterates over the blocks
   def each(&block)
@@ -46,10 +56,26 @@ class Chunk
 
 
   def export
-    newData = @blocks.map { |b| b.id }
-    newblocks = NBTFile::Types::ByteArray.new ByteConverter.toByteString newData
-    @nbtBody["Level"]["Blocks"] = newblocks
+    data = []
+    @blocks.each_with_index do |b, i|
+      if i % 2 == 0
+        data << b.data
+      else
+        data[i / 2] += (b.data << 4)
+      end
+    end
+    @nbtBody["Level"]["Data"] = byteArray data
+    @nbtBody["Level"]["Blocks"] = byteArray @blocks.map { |b| b.id }
     ["", @nbtBody]
+  end
+
+  protected
+  def byteArray(data)
+    NBTFile::Types::ByteArray.new ByteConverter.toByteString(data)
+  end
+
+  def matrixfromBytes(bytes)
+    Matrix3d.new(16, 16, 128).fromArray bytes.map {|byte| Block.get(byte) }
   end
 
 

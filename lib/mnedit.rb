@@ -184,40 +184,41 @@ class Region
     puts "converting: #{pos.inspect}"
     nbtdata = readnbt nbtBytes
     name, body = nbtdata
-    blocks = body['Level']['Blocks']
     c = Chunk.new nbtdata
-    c.block_map do |b|
+    c.each do |b|
       if b.y == 63
-        :wool
-      else
-        b.name
+        b.name = :wool
+        b.data = (b.x + b.z) % 16
       end
     end
-    counter = ChunkCounter.new
-    data = body['Level']['Data']
-    dataArray = data.value.bytes.map do |b|
-      head = b >> 4
-      tail = b & 0xF
-      tailpos = counter.pos
-      counter.inc
-      headpos = counter.pos
-      newHead = if headpos.first == 63
-        y, z, x = headpos
-        (x + z) % 16
-      else
-        head
-      end
-      newTail = if tailpos.first == 63
-        12
-        y, z, x = tailpos
-        (x + z) % 16
-      else
-        tail
-      end
-      counter.inc
-      (newHead << 4) + newTail
-    end
-    body['Level']['Data'] = NBTFile::Types::ByteArray.new dataArray.pack("C*")
+#    counter = ChunkCounter.new
+#    data = body['Level']['Data']
+#    cx = 0
+#    dataArray = data.value.bytes.map do |b|
+#      head = b >> 4
+#      tail = b & 0xF
+#      tailpos = counter.pos
+#      counter.inc
+#      headpos = counter.pos
+#      newHead = if headpos.first == 63
+#        y, z, x = headpos
+#        (x + z) % 16
+#      else
+#        head
+#      end
+#      newTail = if tailpos.first == 63
+#        y, z, x = tailpos
+#        (x + z) % 16
+#      else
+#        tail
+#      end
+#      counter.inc
+#      ret = (newHead << 4) + newTail
+#      puts "counter at is #{cx}: #{ret}"
+#      cx += 1
+#      ret
+#    end
+#    body['Level']['Data'] = NBTFile::Types::ByteArray.new dataArray.pack("C*")
 
     output = StringIO.new
     name, body = c.export
@@ -262,17 +263,12 @@ class Region
       b = blocks[index]
       name = Block.get(b).name
       data = datavalues[index / 2]
-      datavalue = if index % 2 == 0
-        data & 0xF
+      datavalue = if index % 2 == 1
+        data & 0xF #tail 
       else
-        data >> 4
+        data >> 4 #head
       end
-      altData = if index % 2 == 1
-        data & 0xF
-      else
-        data >> 4
-      end
-      puts "#{counter.pos.inspect}: #{name}, data = #{datavalue}, altdata = #{altData}"
+      puts "#{counter.pos.inspect}: #{name}, data = #{datavalue}"
       counter.inc
       index += 1
     end

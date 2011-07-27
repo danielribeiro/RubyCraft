@@ -5,14 +5,15 @@ class Block
   attr_accessor :transparent, :pos, :data
   attr_reader :name, :id
 
-  def initialize(id, name, transparent)
+  def initialize(id, name, transparent, data = 0)
     @id = id
     @name = name.to_s
     @transparent = transparent
+    @data = data
   end
 
   def clone
-    Block.new id, name, transparent
+    Block.new id, name, transparent, data
   end
 
   def self.block(id, name, transparent = false)
@@ -171,3 +172,4 @@ class Block
   block 95, :locked_chest
   transparent_block 96, :trapdoor
 end
+
