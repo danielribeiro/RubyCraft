@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 # Represents a chunk data
 require 'nbt_helper'
 require 'byte_converter'

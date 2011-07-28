@@ -1,5 +1,6 @@
-#!/usr/bin/env ruby
+require 'stringio'
 
+# Utils for manipulating bytes back and forth as strings, strings and numbers
 module ByteConverter
   def toByteString(array)
     array.pack('C*')
@@ -29,5 +30,17 @@ module ByteConverter
       array << i
     end
   end
+
+  def bytesToInt(array)
+    array.pack('C*').unpack("N").first
+  end
+
+  def pad(array, count, value = 0)
+    count.times do
+      array << value
+    end
+    array
+  end
+
   extend self
 end
