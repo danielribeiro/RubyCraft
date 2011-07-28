@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+$LOAD_PATH.unshift File.join(File.dirname(__FILE__),'..','lib')
 require 'fileutils'
 require 'mnedit'
 def file(name)
@@ -14,5 +15,5 @@ result = FileUtils.compare_file output, file('painted.mcr')
 if result
   puts "ok They Are the same"
 else
-  puts "FAIL NOT the same"
+  puts "FAIL!!! NOT the same"
 end

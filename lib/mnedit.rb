@@ -191,35 +191,6 @@ class Region
         b.data = (b.x + b.z) % 16
       end
     end
-#    counter = ChunkCounter.new
-#    data = body['Level']['Data']
-#    cx = 0
-#    dataArray = data.value.bytes.map do |b|
-#      head = b >> 4
-#      tail = b & 0xF
-#      tailpos = counter.pos
-#      counter.inc
-#      headpos = counter.pos
-#      newHead = if headpos.first == 63
-#        y, z, x = headpos
-#        (x + z) % 16
-#      else
-#        head
-#      end
-#      newTail = if tailpos.first == 63
-#        y, z, x = tailpos
-#        (x + z) % 16
-#      else
-#        tail
-#      end
-#      counter.inc
-#      ret = (newHead << 4) + newTail
-#      puts "counter at is #{cx}: #{ret}"
-#      cx += 1
-#      ret
-#    end
-#    body['Level']['Data'] = NBTFile::Types::ByteArray.new dataArray.pack("C*")
-
     output = StringIO.new
     name, body = c.export
     NBTFile.write(output, name ,body)
