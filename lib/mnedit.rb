@@ -4,45 +4,7 @@ require 'active_support'
 require 'chunk'
 require 'stringio'
 require 'zlib'
-
-class Integer
-  def bytes
-    [self >> 24, (self >> 16) & 0xFF, (self >> 8) & 0xFF, self & 0xFF]
-  end
-end
-
-module ArrayExtension
-  def add_all(enum)
-    for i in enum
-      self << i
-    end
-    self
-  end
-
-  # To be used when the array is used as a byte array
-  def toIo
-    io = StringIO.new
-    io.write self.pack('C*')
-    io.rewind
-    io
-  end
-end
-
-class Array
-  include ArrayExtension
-end
-
-class String
-  # To be used when string is used as a byte array
-  def toIo
-    byteArray.toIo
-  end
-
-  def byteArray
-    bytes.to_a
-  end
-end
-
+require 'byte_converter'
 class ChunkCounter
   attr_reader :x, :y, :z
 
@@ -96,11 +58,13 @@ end
 
 
 class Region
+  include ByteConverter
+
   attr_accessor :bytes
   attr_accessor :file
 
   def initialize(file)
-    @bytes = IO.read(file).byteArray
+    @bytes = stringToByteArray IO.read(file)
     @file = file
   end
 
@@ -145,7 +109,7 @@ class Region
         offset = lastVacantPosition
         sizeCount = ((chunk.size + chunkMetaDataSize).to_f / 4096).ceil
         lastVacantPosition += sizeCount
-        newBytes.add_all offset.bytes[1..3]
+        concat newBytes, intBytes(offset)[1..3]
         newBytes << sizeCount
       else
         pad newBytes, 4
@@ -155,9 +119,9 @@ class Region
     pad newBytes, 4096, dummytimestamp
     for chunk in chunks
       next if chunk.nil?
-      newBytes.add_all((chunk.size + 1).bytes)
+      concat newBytes, intBytes(chunk.size + 1)
       newBytes << defaultCompressionType
-      newBytes.add_all chunk
+      concat newBytes, chunk
       size = (chunk.size + chunkMetaDataSize)
       remaining = 4096 - (size % 4096)
       pad newBytes, remaining % 4096
@@ -193,7 +157,7 @@ class Region
     output = StringIO.new
     name, body = c.export
     NBTFile.write(output, name, body)
-    out = compress(output.string).byteArray
+    out = stringToByteArray compress(output.string)
     return out
   end
 
@@ -288,7 +252,7 @@ class Region
     body['Level']['Blocks'] = NBTFile::Types::ByteArray.new newarray.pack("C*")
     output = StringIO.new
     NBTFile.write(output, name, body)
-    @bytes[offset..(offset + bytecount - 2)] = compress(output.string).byteArray
+    @bytes[offset..(offset + bytecount - 2)] = stringToByteArray compress(output.string)
     self
   end
 
@@ -298,7 +262,10 @@ class Region
   end
 
   def readnbt(bytes)
-    NBTFile.read Zlib::Inflate.inflate(bytes.toIo.read).toIo
+    puts "bytes are #{bytes.class}"
+    ret = Zlib::Inflate.inflate(toByteString(bytes))
+    puts "ret is #{ret.class}"
+    NBTFile.read  stringToIo ret
   end
 
   def compress(str)

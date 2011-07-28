@@ -1,8 +1,3 @@
-# 
-# To change this template, choose Tools | Templates
-# and open the template in the editor.
- 
-
 require 'rubygems'
 require 'rake'
 require 'rake/clean'
@@ -26,11 +21,6 @@ spec = Gem::Specification.new do |s|
   s.bindir = "bin"
 end
 
-Rake::GemPackageTask.new(spec) do |p|
-  p.gem_spec = spec
-  p.need_tar = true
-  p.need_zip = true
-end
 
 Rake::RDocTask.new do |rdoc|
   files =['README', 'LICENSE', 'lib/**/*.rb']
@@ -41,11 +31,7 @@ Rake::RDocTask.new do |rdoc|
   rdoc.options << '--line-numbers'
 end
 
-Rake::TestTask.new do |t|
-  t.test_files = FileList['test/**/*.rb']
-end
-
 Spec::Rake::SpecTask.new do |t|
-  t.spec_files = FileList['spec/**/*.rb']
+  t.spec_files = FileList['spec/**/*spec.rb']
   t.libs << Dir["lib"]
 end

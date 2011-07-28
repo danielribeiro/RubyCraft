@@ -22,4 +22,3 @@ describe Block do
     Block.of(:air).is(:air).should be_true
   end
 end
-

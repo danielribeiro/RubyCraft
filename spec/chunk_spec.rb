@@ -1,50 +1,10 @@
 require 'rspec_helper'
 require 'chunk'
-require 'block'
-
-# Opening Chunk so that we can test with smaller data set (2x2x8 per chunk),
-#instead of 16x16x128 of regular minecraft chunk
-class Chunk
-  def matrixfromBytes(bytes)
-    Matrix3d.new(2, 2, 8).fromArray bytes.map {|byte| Block.get(byte) }
-  end
-end
+require 'chunk_helper'
 
 describe Chunk do
   include ByteConverter
-  def byteArray(array)
-    NBTFile::Types::ByteArray.new toByteString array
-  end
-
-  # height of the test chunk
-  def h
-    8
-  end
-
-  # the area of a horizontal section (how many blocks that have the same y)
-  def area
-    4
-  end
-
-  def cube
-    h * area
-  end
-
-  # Data cube has half as much bytes
-  def datacube
-    cube / 2
-  end
-
-  def createChunk(blockdata = [0] * datacube, blocks = [Block[:stone].id] * cube)
-    nbt = NBTFile::Types::Compound.new
-    nbt["Level"] = NBTFile::Types::Compound.new
-    level = nbt["Level"]
-    level['HeightMap'] = byteArray [h] * area
-    level["Blocks"] = byteArray blocks
-    level["Data"] = byteArray blockdata
-    Chunk.new(["", nbt])
-  end
-
+  include ChunkHelper
   def blocksAre(chunk, name)
     blocksEqual chunk, [name] * cube
   end
@@ -144,11 +104,9 @@ describe Chunk do
     newData["Level"]["HeightMap"].value.should == toByteString([1] * area)
   end
 
-  
   #  it "can iterate over planes"
   #  it "can iterate over lines"
   #  it "can iterate over cubes"
-  #  it "corrects height map" -> highest nontransparent + 1
 
 end
 
