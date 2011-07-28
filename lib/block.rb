@@ -3,12 +3,15 @@ require 'block_type'
 
 # A minecraft block. Its position is given by a coord[x, z, y]
 class Block
-  attr_accessor :block_type, :pos, :data
-
   ColorValues = %w[white orange magenta light_blue yellow light_green pink gray
     light_gray cyan purple blue brown dark_green red black].map &:to_sym
   InvertedColor = Hash[ColorValues.each_with_index.to_a]
 
+  attr_accessor :block_type, :pos, :data
+  def initialize(blockType, data = 0)
+    @blockType = blockType
+    @data = 0
+  end
 
   def self.get(key)
     new BlockType.get key
@@ -31,11 +34,6 @@ class Block
     ColorValues[@data]
   end
 
-  def initialize(blockType, data = 0)
-    @blockType = blockType
-    @data = 0
-  end
-
   def is(name)
     self.name == name.to_s
   end
@@ -52,13 +50,13 @@ class Block
     @blockType.transparent
   end
 
-  #sets name along with id
+  #sets block type by name
   def name=(newName)
     return if name == newName.to_s
     @blockType = BlockType[newName]
   end
 
-  #sets name along with id
+  #sets block type by id
   def id=(id)
     return if id == id
     @blockType = BlockType.get id
