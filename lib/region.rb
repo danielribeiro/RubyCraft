@@ -9,8 +9,8 @@ class Region
   attr_accessor :file
 
   def initialize(file)
-    @bytes = stringToByteArray IO.read(file)
-    @file = file
+#    @bytes = stringToByteArray IO.read(file)
+#    @file = file
   end
 
   def write
