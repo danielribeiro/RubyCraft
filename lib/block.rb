@@ -1,14 +1,27 @@
 #!/usr/bin/env ruby
-require 'block_type_dsl'
+require 'block_type'
 
 # A minecraft block. Its position is given by a coord[x, z, y]
 class Block
-  attr_accessor :transparent, :pos, :data
-  attr_reader :name, :id
+  attr_accessor :block_type, :pos, :data
 
   ColorValues = %w[white orange magenta light_blue yellow light_green pink gray
     light_gray cyan purple blue brown dark_green red black].map &:to_sym
   InvertedColor = Hash[ColorValues.each_with_index.to_a]
+
+
+  def self.get(key)
+    new BlockType.get key
+  end
+
+  def self.of(key)
+    self[key]
+  end
+
+  def self.[](key)
+    new BlockType[key]
+  end
+
 
   def color=(color)
     @data = InvertedColor[color]
@@ -18,32 +31,37 @@ class Block
     ColorValues[@data]
   end
 
-  def initialize(id, name, transparent, data = 0)
-    @id = id
-    @name = name.to_s
-    @transparent = transparent
-    @data = data
-  end
-
-  def clone
-    self.class.new id, name, transparent, data
+  def initialize(blockType, data = 0)
+    @blockType = blockType
+    @data = 0
   end
 
   def is(name)
     self.name == name.to_s
   end
 
+  def name
+    @blockType.name
+  end
+
+  def id
+    @blockType.id
+  end
+
+  def transparent
+    @blockType.transparent
+  end
+
   #sets name along with id
   def name=(newName)
-    value = newName.to_s
-    @name = value
-    @id = Block[value].id
+    return if name == newName.to_s
+    @blockType = BlockType[newName]
   end
 
   #sets name along with id
   def id=(id)
-    @id = id
-    @name = Block.get(id).name
+    return if id == id
+    @blockType = BlockType.get id
   end
 
   def y
@@ -59,38 +77,3 @@ class Block
   end
 end
 
-
-# class methods and dsl for block
-class Block
-  def self.block(id, name, transparent = false)
-    @blocks ||= {}
-    @blocks_by_name ||= {}
-    block = Block.new id, name, transparent
-    @blocks[id] = block
-    @blocks_by_name[name.to_s] = block
-
-  end
-
-  def self.transparent_block(id, name)
-    block id, name, true
-  end
-
-  def self.get(key)
-    if @blocks.has_key?(key)
-      return @blocks[key].clone
-    end
-    Block.new(key, "unknown(#{key})", false)
-  end
-
-  def self.of(key)
-    self[key]
-  end
-
-  def self.[](key)
-    key = key.to_s
-    return @blocks_by_name[key].clone if @blocks_by_name.has_key?(key)
-    raise "no such name: #{key}"
-  end
-
-  class_eval &BlockTypeDSL
-end

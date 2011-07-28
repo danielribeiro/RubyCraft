@@ -10,12 +10,12 @@ class Chunk
 
   def initialize(nbtData)
     name, @nbtBody = nbtData
-    bytes = @nbtBody["Level"]["Blocks"].value.bytes
+    bytes = level["Blocks"].value.bytes
     @blocks = matrixfromBytes bytes
-    @blocks.each_triple_index do |b, pos|
-      b.pos = pos
+    @blocks.each_triple_index do |b, z, x, y|
+      b.pos = [z, x, y]
     end
-    data = @nbtBody["Level"]["Data"].value.bytes.to_a
+    data = level["Data"].value.bytes.to_a
     @blocks.each_with_index do |b, index|
       v = data[index / 2]
       if index % 2 == 0
@@ -53,9 +53,36 @@ class Chunk
     @blocks[z, x, y] = value
   end
 
-
-
   def export
+    level["Data"] = byteArray exportLevelData
+    level["Blocks"] = byteArray @blocks.map { |b| b.id }
+    level["HeightMap"] = byteArray exportHeightMap
+    ["", @nbtBody]
+  end
+
+  protected
+  def exportHeightMap
+    zwidth, xwidth, ywidth = @blocks.bounds
+    matrix = Array.new(zwidth) { Array.new(xwidth) { 1 }}
+    @blocks.each_triple_index do |b, z, x, y|
+      unless b.transparent
+        matrix[z][x] = [matrix[z][x], y + 1].max
+      end
+    end
+    ret = []
+    matrix.each do |line|
+      line.each do |height|
+        ret << height
+      end
+    end
+    ret
+  end
+
+  def level
+    @nbtBody["Level"]
+  end
+
+  def exportLevelData
     data = []
     @blocks.each_with_index do |b, i|
       if i % 2 == 0
@@ -64,12 +91,9 @@ class Chunk
         data[i / 2] += (b.data << 4)
       end
     end
-    @nbtBody["Level"]["Data"] = byteArray data
-    @nbtBody["Level"]["Blocks"] = byteArray @blocks.map { |b| b.id }
-    ["", @nbtBody]
+    data
   end
 
-  protected
   def byteArray(data)
     NBTFile::Types::ByteArray.new ByteConverter.toByteString(data)
   end

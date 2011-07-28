@@ -12,5 +12,14 @@ describe Block do
     b = Block.of :wool
     b.color.should == :white
   end
+
+  it "air block is transparent" do
+    Block.of(:air).transparent.should == true
+    Block.get(0).transparent.should == true
+  end
+
+  it "can compare block names" do
+    Block.of(:air).is(:air).should be_true
+  end
 end
 

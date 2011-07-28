@@ -84,8 +84,8 @@ describe Matrix3d do
     m = Matrix3d.new 1, 3, 2
     m.fromArray([0, 1, 2, 3, 4, 5])
     ret = []
-    m.each_triple_index do |obj, index|
-      ret << [obj, index]
+    m.each_triple_index do |obj, x, y, z|
+      ret << [obj, [x, y, z]]
     end
     ret.should == [[0, [0, 0, 0]], [1, [0, 0, 1]],
       [2, [0, 1, 0]], [3, [0, 1, 1]], [4, [0, 2, 0]], [5, [0, 2, 1]]]
@@ -94,8 +94,8 @@ describe Matrix3d do
   it "returns an enumerable if each_triple_index is given no argument" do
     m = Matrix3d.new 1, 3, 2
     m.fromArray([0, 1, 2, 3, 4, 5])
-    ret = m.each_triple_index.map do |obj, index|
-      [obj, index]
+    ret = m.each_triple_index.map do |obj, x, y, z|
+      [obj, [x, y, z]]
     end
     ret.should == [[0, [0, 0, 0]], [1, [0, 0, 1]],
       [2, [0, 1, 0]], [3, [0, 1, 1]], [4, [0, 2, 0]], [5, [0, 2, 1]]]

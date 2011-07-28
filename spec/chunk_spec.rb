@@ -141,7 +141,7 @@ describe Chunk do
     end
     blocksEqual chunk, ([:stone] + [:air] * (h - 1)) * area
     chunkName, newData = chunk.export
-    newData["Level"]["HeightMap"].value.should == toByteString([2] * area)
+    newData["Level"]["HeightMap"].value.should == toByteString([1] * area)
   end
 
   

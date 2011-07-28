@@ -6,6 +6,10 @@ end
 class Matrix3d
   include Enumerable
 
+  def bounds
+    [@xlimit, @ylimit, @zlimit]
+  end
+
   def initialize(d1,d2,d3)
     @xlimit = d1
     @ylimit = d2
@@ -48,7 +52,7 @@ class Matrix3d
     @data.each_with_index do |plane, x|
       plane.each_with_index do |column, y|
         column.each_with_index do |value, z|
-          yield value, [x ,y ,z]
+          yield value, x ,y ,z
         end
       end
     end
