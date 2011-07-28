@@ -6,6 +6,18 @@ class Block
   attr_accessor :transparent, :pos, :data
   attr_reader :name, :id
 
+  ColorValues = %w[white orange magenta light_blue yellow light_green pink gray
+    light_gray cyan purple blue brown dark_green red black].map &:to_sym
+  InvertedColor = Hash[ColorValues.each_with_index.to_a]
+
+  def color=(color)
+    @data = InvertedColor[color]
+  end
+
+  def color
+    ColorValues[@data]
+  end
+
   def initialize(id, name, transparent, data = 0)
     @id = id
     @name = name.to_s
@@ -47,27 +59,13 @@ class Block
   end
 end
 
-class WoolBlock < Block
-  ColorValues = %w[white orange magenta light_blue yellow light_green pink gray
-    light_gray cyan purple blue brown dark_green red black].map &:to_sym
-  InvertedColor = Hash[ColorValues.each_with_index.to_a]
-
-  def color=(color)
-    @data = InvertedColor[color]
-  end
-
-  def color
-    ColorValues[@data]
-  end
-end
 
 # class methods and dsl for block
 class Block
   def self.block(id, name, transparent = false)
     @blocks ||= {}
     @blocks_by_name ||= {}
-    clas = if name.to_s == "wool" then WoolBlock else Block end
-    block = clas.new id, name, transparent
+    block = Block.new id, name, transparent
     @blocks[id] = block
     @blocks_by_name[name.to_s] = block
 

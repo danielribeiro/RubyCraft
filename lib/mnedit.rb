@@ -183,7 +183,6 @@ class Region
     return nbtBytes unless block_given? and block.call(pos)
     puts "converting: #{pos.inspect}"
     nbtdata = readnbt nbtBytes
-    name, body = nbtdata
     c = Chunk.new nbtdata
     c.each do |b|
       if b.y == 63
@@ -193,7 +192,7 @@ class Region
     end
     output = StringIO.new
     name, body = c.export
-    NBTFile.write(output, name ,body)
+    NBTFile.write(output, name, body)
     out = compress(output.string).byteArray
     return out
   end
