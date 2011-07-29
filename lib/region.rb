@@ -10,7 +10,7 @@ class LazyChunkDelegate
   end
 
   def each(&block)
-     _getchunk.each &block
+    _getchunk.each &block
   end
   
   def block_map(&block)
@@ -78,6 +78,7 @@ class Region
   end
 
   def initialize(bytes)
+    raise "Must be an io" if bytes.kind_of?(String)
     @bytes = bytes
     @chunks = Array.new(32) { Array.new(32) }
     readChunks bytes

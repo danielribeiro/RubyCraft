@@ -1,16 +1,26 @@
 #!/usr/bin/env ruby
 $LOAD_PATH.unshift File.join(File.dirname(__FILE__),'..','lib')
+require 'rubygems'
 require 'fileutils'
-require 'mnedit'
+require 'region'
 def file(name)
   File.join(File.dirname(__FILE__),'..','fixtures', name)
 end
 
-input = file 'input.mcr'
-r = Region.new(input)
+r = Region.fromFile file 'input.mcr'
+for x in 0..2
+  for z in 0..2
+    puts "converting #{x} , #{z}"
+    r.chunk(x, z).each do |b|
+      if b.y == 63
+        b.name = :wool
+        b.data = (b.x + b.z) % 16
+      end
+    end
+  end
+end
 output = file 'output.mcr'
-r.file = output
-r.convertChunks { |x, y| x <= 2 && y <=2}
+r.exportToFile output
 result = FileUtils.compare_file output, file('painted.mcr')
 if result
   puts "ok They Are the same"
