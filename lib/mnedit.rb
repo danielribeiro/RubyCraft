@@ -97,6 +97,7 @@ class Region
       offset = bytesToInt [0] + ar[0..-2]
       count = ar.last
       if count > 0
+        puts "at offset: #{offset}"
         chunks << convertChunk(offset, counter.pos, &block)
       else
         chunks << nil

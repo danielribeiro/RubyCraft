@@ -7,6 +7,11 @@ require 'matrix3d'
 # Chunks are enumerable over blocks
 class Chunk
   include Enumerable
+  include ZlibHelper
+
+  def self.fromNbt(bytes)
+    new NbtHelper.fromNbt bytes
+  end
 
   def initialize(nbtData)
     name, @nbtBody = nbtData
@@ -57,6 +62,10 @@ class Chunk
     level["Blocks"] = byteArray @blocks.map { |b| b.id }
     level["HeightMap"] = byteArray exportHeightMap
     ["", @nbtBody]
+  end
+
+  def toNbt
+    NbtHelper.toBytes export
   end
 
   protected
