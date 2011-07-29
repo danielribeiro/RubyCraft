@@ -59,6 +59,7 @@ end
 
 class Region
   include ByteConverter
+  include ZlibHelper
 
   attr_accessor :bytes
   attr_accessor :file
@@ -129,13 +130,6 @@ class Region
     File.open(@file, "wb") do |f|
       f << newBytes.pack("C*")
     end
-  end
-
-  def pad(array, count, value = 0)
-    count.times do
-      array << value
-    end
-    array
   end
 
   def convertChunk(offset, pos, &block)
@@ -257,19 +251,8 @@ class Region
   end
 
   protected
-  def bytesToInt(array)
-    array.pack('C*').unpack("N").first
-  end
-
   def readnbt(bytes)
-    puts "bytes are #{bytes.class}"
-    ret = Zlib::Inflate.inflate(toByteString(bytes))
-    puts "ret is #{ret.class}"
-    NBTFile.read  stringToIo ret
-  end
-
-  def compress(str)
-    Zlib::Deflate.deflate(str)
+    NBTFile.read  stringToIo decompress(toByteString(bytes))
   end
 
 end

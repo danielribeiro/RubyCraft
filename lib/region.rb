@@ -4,37 +4,40 @@ require 'zlib'
 
 class Region
   include ByteConverter
+  include ZlibHelper
 
-  attr_accessor :bytes
-  attr_accessor :file
-
-  def initialize(file)
-#    @bytes = stringToByteArray IO.read(file)
-#    @file = file
+  def initialize(bytes)
+    @bytes = bytes
+    @chunks = Array.new(32) { Array.new(32) }
+    readChunks
   end
 
-  def write
-    File.open(@file, "wb") do |f|
-      f << bytes.pack("C*")
-    end
-    self
+  def chunk(x, z)
+    @chunks[z][x]
   end
 
-  def convertChunks(&block)
-    chunkMetaDataSize = 5
-    dummytimestamp = 0
-    chunks = []
-    counter = PlaneCounter.new
-    bytes[0..4095].each_slice(4) do |ar|
+  def readChunks
+    @bytes[0..4095].each_slice(4).each_with_index do |ar, i|
       offset = bytesToInt [0] + ar[0..-2]
       count = ar.last
       if count > 0
-        chunks << convertChunk(offset, counter.pos, &block)
-      else
-        chunks << nil
+        @chunks[i / 32][i % 32 ] = readChunk(offset)
       end
-      counter.inc
     end
+  end
+
+  def readChunk(offset)
+    o = offset * 4096
+    bytecount = bytesToInt @bytes[o..(o + 4)]
+    o += 5
+    nbtBytes = @bytes[o..(o + bytecount - 2)]
+    Chunk.new readnbt nbtBytes
+  end
+
+
+  def writeChunks
+    chunkMetaDataSize = 5
+    dummytimestamp = 0
     newBytes = []
     lastVacantPosition = 2
     for chunk in chunks
@@ -64,14 +67,10 @@ class Region
     end
   end
 
-  def convertChunk(offset, pos, &block)
-    o = offset * 4096
-    bytecount = bytesToInt bytes[o..(o + 4)]
-    o += 5
-    nbtBytes = bytes[o..(o + bytecount - 2)]
-    offset = o
-    return nbtBytes unless block_given? and block.call(pos)
-    puts "converting: #{pos.inspect}"
+
+
+  # deprecated
+  def doconvertChunk
     nbtdata = readnbt nbtBytes
     c = Chunk.new nbtdata
     c.each do |b|
@@ -87,44 +86,17 @@ class Region
     return out
   end
 
-  def getNbt(x, z)
-    o = 4 * (x + z * 32)
-    offset = bytesToInt [0] + bytes[o..(o + 2)]
-    o = offset * 4096
-    bytecount = bytesToInt bytes[o..(o + 4)]
-    o += 5
-    nbtBytes = bytes[o..(o + bytecount - 2)]
-    readnbt nbtBytes
-  end
-
-
-  def change(x, z)
-    o = 4 * (x + z * 32)
-    offset = bytesToInt [0] + bytes[o..(o + 2)]
-    o = offset * 4096
-    bytecount = bytesToInt bytes[o..(o + 4)]
-    o += 5
-    nbtBytes = bytes[o..(o + bytecount - 2)]
-    offset = o
-    name, body = readnbt nbtBytes
-    blocks = body['Level']['Blocks']
-    newarray = blocks.value.bytes.map do |b|
-      8
-    end
-    body['Level']['Blocks'] = NBTFile::Types::ByteArray.new newarray.pack("C*")
-    output = StringIO.new
-    NBTFile.write(output, name, body)
-    @bytes[offset..(offset + bytecount - 2)] = stringToByteArray compress(output.string)
-    self
-  end
-
   protected
   def readnbt(bytes)
-    NBTFile.read  stringToIo Zlib::Inflate.inflate(toByteString(bytes))
+    NBTFile.read  stringToIo decompress(toByteString(bytes))
   end
 
-  def compress(str)
-    Zlib::Deflate.deflate(str)
+  # deprecated
+  def write
+    File.open(@file, "wb") do |f|
+      f << bytes.pack("C*")
+    end
+    self
   end
 
 end

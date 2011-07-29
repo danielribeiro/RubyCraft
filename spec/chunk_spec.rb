@@ -5,15 +5,7 @@ require 'chunk_helper'
 describe Chunk do
   include ByteConverter
   include ChunkHelper
-  def blocksAre(chunk, name)
-    blocksEqual chunk, [name] * cube
-  end
 
-  def blocksEqual(chunk, nameArray)
-    blocks = nameArray.map { |name| Block[name].id }
-    chunkName, newData = chunk.export
-    newData["Level"]["Blocks"].value.should == toByteString(blocks)
-  end
 
   it "can use to change all block to another type" do
     chunk = createChunk
