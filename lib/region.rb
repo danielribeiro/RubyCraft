@@ -2,44 +2,51 @@ require 'byte_converter'
 require 'chunk'
 require 'zlib'
 
+# Enumerable over chunks
 class Region
+  include Enumerable
   include ByteConverter
   include ZlibHelper
 
   def initialize(bytes)
-    @bytes = bytes
     @chunks = Array.new(32) { Array.new(32) }
-    readChunks
+    readChunks bytes
   end
 
   def chunk(x, z)
     @chunks[z][x]
   end
 
-  def readChunks
-    @bytes[0..4095].each_slice(4).each_with_index do |ar, i|
-      offset = bytesToInt [0] + ar[0..-2]
-      count = ar.last
-      if count > 0
-        @chunks[i / 32][i % 32 ] = readChunk(offset)
+  def each(&block)
+    @chunks.each do |line|
+      line.each do |chunk|
+        yield chunk
       end
     end
   end
 
-  def readChunk(offset)
+  def readChunks(bytes)
+    bytes[0..4095].each_slice(4).each_with_index do |ar, i|
+      offset = bytesToInt [0] + ar[0..-2]
+      count = ar.last
+      if count > 0
+        @chunks[i / 32][i % 32 ] = readChunk(offset, bytes)
+      end
+    end
+  end
+
+  def readChunk(offset, bytes)
     o = offset * 4096
-    bytecount = bytesToInt @bytes[o..(o + 4)]
+    bytecount = bytesToInt bytes[o..(o + 4)]
     o += 5
-    nbtBytes = @bytes[o..(o + bytecount - 2)]
+    nbtBytes = bytes[o..(o + bytecount - 2)]
     Chunk.new readnbt nbtBytes
   end
 
-
-  def writeChunks
-    chunkMetaDataSize = 5
-    dummytimestamp = 0
+  def exportTo(io)
     newBytes = []
     lastVacantPosition = 2
+    chunks = getChunks
     for chunk in chunks
       if chunk
         offset = lastVacantPosition
@@ -51,7 +58,6 @@ class Region
         pad newBytes, 4
       end
     end
-    defaultCompressionType = 2
     pad newBytes, 4096, dummytimestamp
     for chunk in chunks
       next if chunk.nil?
@@ -62,41 +68,37 @@ class Region
       remaining = 4096 - (size % 4096)
       pad newBytes, remaining % 4096
     end
-    File.open(@file, "wb") do |f|
-      f << newBytes.pack("C*")
-    end
-  end
-
-
-
-  # deprecated
-  def doconvertChunk
-    nbtdata = readnbt nbtBytes
-    c = Chunk.new nbtdata
-    c.each do |b|
-      if b.y == 63
-        b.name = :wool
-        b.data = (b.x + b.z) % 16
-      end
-    end
-    output = StringIO.new
-    name, body = c.export
-    NBTFile.write(output, name, body)
-    out = stringToByteArray compress(output.string)
-    return out
+    io << newBytes.pack("C*")
   end
 
   protected
-  def readnbt(bytes)
-    NBTFile.read  stringToIo decompress(toByteString(bytes))
+  def getChunks
+    map do |chunk|
+      unless chunk.nil?
+        output = StringIO.new
+        name, body = chunk.export
+        NBTFile.write(output, name, body)
+        stringToByteArray compress output.string
+      else
+        nil
+      end
+    end
   end
 
-  # deprecated
-  def write
-    File.open(@file, "wb") do |f|
-      f << bytes.pack("C*")
-    end
-    self
+  def readnbt(bytes)
+    NBTFile.read stringToIo decompress toByteString bytes
+  end
+
+  def chunkMetaDataSize
+    5
+  end
+
+  def defaultCompressionType
+    2
+  end
+
+  def dummytimestamp
+    0
   end
 
 end

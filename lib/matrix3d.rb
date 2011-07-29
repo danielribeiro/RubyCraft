@@ -92,7 +92,6 @@ class Matrix3d
   end
 
   def within(value, limit)
-
     raise IndexOutOfBoundsError if value < 0 or value >= limit
   end
 end

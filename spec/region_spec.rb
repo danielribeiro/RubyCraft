@@ -39,9 +39,19 @@ describe Region do
     Region.new locations + timestamps + chunkdata
   end
 
-  it "should desc" do
+  it "yields the chunk position as a Chunk object" do
     c = region.chunk 0, 0
     blocksAre c, :stone
+  end
+
+  it "can write write to a file and read back" do
+    r = region
+    r.chunk(0, 0).block_map { :gold }
+    file = StringIO.new
+    r.exportTo(file)
+    bytes = stringToByteArray file.string
+    newRegion = Region.new bytes
+    blocksAre newRegion.chunk(0, 0), :gold
   end
 end
 

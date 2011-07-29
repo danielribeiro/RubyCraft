@@ -4,6 +4,7 @@ require 'byte_converter'
 require 'block'
 require 'matrix3d'
 
+# Chunks are enumerable over blocks
 class Chunk
   include Enumerable
 
@@ -24,7 +25,6 @@ class Chunk
       end
     end
   end
-
 
   # Iterates over the blocks
   def each(&block)
