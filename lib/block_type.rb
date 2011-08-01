@@ -122,6 +122,7 @@ class BlockColor
   @typeColor = []
 
   def self.method_missing(name, *args)
+    args << @typeColor.size
     @typeColor << new(name, *args)
   end
 
@@ -129,12 +130,13 @@ class BlockColor
     @typeColor
   end
 
-  attr_reader :name, :r, :g, :b
-  def initialize(name, r, g, b)
+  attr_reader :name, :r, :g, :b, :data
+  def initialize(name, r, g, b, data)
     @name = name
     @r = r
     @g = g
     @b = b
+    @data = data
   end
 
   def rgb

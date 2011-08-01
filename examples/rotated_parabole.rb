@@ -1,54 +1,13 @@
 #!/usr/bin/env ruby
-$LOAD_PATH.unshift File.join(File.dirname(__FILE__),'..','lib')
-require 'rubygems'
+require 'example_helpers'
 require 'fileutils'
 require 'region'
 require 'set'
 
-# From http://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm#Ruby
-module Bresenham
-  Point2D = Struct.new :x, :y
-  def point(x, y)
-    Point2D.new x, y
-  end
-
-  def draw_line(p1, p2)
-    ret = []
-    x1, y1 = p1.x, p1.y
-    x2, y2 = p2.x, p2.y
-
-    steep = (y2 - y1).abs > (x2 - x1).abs
-
-    if steep
-      x1, y1 = y1, x1
-      x2, y2 = y2, x2
-    end
-
-    if x1 > x2
-      x1, x2 = x2, x1
-      y1, y2 = y2, y1
-    end
-
-    deltax = x2 - x1
-    deltay = (y2 - y1).abs
-    error = deltax / 2
-    ystep = y1 < y2 ? 1 : -1
-
-    y = y1
-    x1.upto(x2) do |x|
-      pixel = steep ? [y,x] : [x,y]
-      ret << pixel
-      error -= deltay
-      if error < 0
-        y += ystep
-        error += deltax
-      end
-    end
-    return ret
-  end
-end
-
 include Bresenham
+include ColorTopology
+black = BlockColor.typeColor[BlockColor::InvertedColor[:black]].rgb
+orderedColors =  BlockColor.typeColor.sort_by { |b| squaredColorDist(b.rgb, black) }
 
 def f(x, z)
   x -= 16
@@ -82,7 +41,7 @@ end
 r.cube(0, 0, 0, :width => 16 * 3, :length => 16 * 3, :height => 128) do |b, z, x, y|
   if points.include?([z, x, y])
     b.name = :wool
-    b.data = (x + z) % 16
+    b.data = orderedColors[y * 16 / 128].data
   else
     b.name = :air
   end
