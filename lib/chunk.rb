@@ -9,6 +9,10 @@ class Chunk
   include Enumerable
   include ZlibHelper
 
+  Width = 16
+  Length = 16
+  Height = 128
+
   def self.fromNbt(bytes)
     new NbtHelper.fromNbt bytes
   end
@@ -107,7 +111,7 @@ class Chunk
   end
 
   def matrixfromBytes(bytes)
-    Matrix3d.new(16, 16, 128).fromArray bytes.map {|byte| Block.get(byte) }
+    Matrix3d.new(Width, Length, Height).fromArray bytes.map {|byte| Block.get(byte) }
   end
 
 

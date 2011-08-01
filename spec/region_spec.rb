@@ -3,6 +3,14 @@ require 'chunk'
 require 'chunk_helper'
 require 'region'
 
+# Opening Chunk cube so that the chunk sizes are the ones under test.
+# See chunk_helper
+class ChunkCube
+  def chunkSide
+    2
+  end
+end
+
 describe Region do
   include ByteConverter
   include ChunkHelper
@@ -53,5 +61,54 @@ describe Region do
     newRegion = Region.new bytes
     blocksAre newRegion.chunk(0, 0), :gold
   end
-end
 
+  it "can view cubes of one chunk" do
+    r = region
+    chunks = r.instance_variable_get(:@chunks)
+    r.cube(1, 1, 1, :width => 1, :length => 1, :height => 7) do |block, z, x, y|
+      block.name = :wool
+    end
+    blocksEqual r.chunk(0, 0),
+      [:stone] * h * 3 + [:stone] + [:wool] * 7
+  end
+
+  it "can view cubes of one chunk other than 0, 0" do
+    r = region
+    chunks = r.instance_variable_get(:@chunks)
+    chunks[1][1] = createChunk
+    r.cube(3, 3, 1, :width => 1, :length => 1, :height => 7) do |block, z, x, y|
+      block.name = :wool
+    end
+    blocksEqual r.chunk(1, 1),
+      [:stone] * h * 3 + [:stone] + [:wool] * 7
+  end
+
+  it "allows viewing local cube coordintates when iterating over cubes" do
+    r = region
+    ret = r.cube(1, 1, 1, :width => 1, :length => 1, :height => 7).
+      map do |block, z, x, y|
+      [z, x, y]
+    end
+    ret.should == [[0, 0, 0], [0, 0, 1], [0, 0, 2], [0, 0, 3], [0, 0, 4],
+      [0, 0, 5], [0, 0, 6]
+    ]
+  end
+
+  it "can view cubes spanning chunks with a single coordinate system" do
+    r = region
+    chunks = r.instance_variable_get(:@chunks)
+    chunks[0][1] = createChunk
+    chunks[1][1] = createChunk
+    chunks[1][0] = createChunk
+    chunks[2][0] = createChunk
+    r.cube(1, 1, 1, :width => 3, :length => 3, :height => 7) do |block, z, x, y|
+      block.name = :wool
+    end
+    semiWool = [:stone] + [:wool] * 7
+    blocksEqual r.chunk(0, 0), [:stone] * h * 3 + semiWool
+    blocksEqual r.chunk(1, 0), ([:stone] * h * 2) + semiWool * 2
+    blocksEqual r.chunk(0, 1), ([:stone] * h  + semiWool) *  2
+    blocksEqual r.chunk(1, 1), semiWool * area
+    blocksAre r.chunk(2, 0), :stone
+  end
+end

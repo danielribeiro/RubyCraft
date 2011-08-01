@@ -95,11 +95,6 @@ describe Chunk do
     chunkName, newData = chunk.export
     newData["Level"]["HeightMap"].value.should == toByteString([1] * area)
   end
-
-  #  it "can iterate over planes"
-  #  it "can iterate over lines"
-  #  it "can iterate over cubes"
-
 end
 
 
