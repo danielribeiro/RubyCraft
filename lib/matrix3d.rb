@@ -18,12 +18,10 @@ class Matrix3d
   end
 
   def [](x, y, z)
-    checkBounds x, y, z
     @data[x][y][z]
   end
 
   def []=(x, y, z, value)
-    checkBounds x, y, z
     @data[x][y][z] = value
   end
 
@@ -85,13 +83,4 @@ class Matrix3d
   end
 
 
-  def checkBounds(x, y, z)
-    within x, @xlimit
-    within y, @ylimit
-    within z, @zlimit
-  end
-
-  def within(value, limit)
-    raise IndexOutOfBoundsError unless value.between? 0, limit
-  end
 end

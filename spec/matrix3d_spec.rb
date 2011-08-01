@@ -9,20 +9,6 @@ describe Matrix3d do
     m[0, 0, 0].should == 'on 0 0 0'
   end
 
-  it "doesn't allow positions beside the dimensions passed on the contructor" do
-    raisesException IndexOutOfBoundsError do
-      m = Matrix3d.new 2, 3, 4
-      m[5, 0, 0]
-    end
-  end
-
-  it "doesn't allow positions beyond the dimensions passed on the contructor on write" do
-    raisesException IndexOutOfBoundsError do
-      m = Matrix3d.new 2, 3, 4
-      m[5, 0, 0] = 5
-    end
-  end
-
   it "can coerce a index into a position" do
     m = Matrix3d.new 4, 3, 2
     m.put 1, 'a value'

@@ -11,6 +11,13 @@ class ChunkCube
   end
 end
 
+# implementing unload for those chunks that are created directly, for testing purposes
+class Chunk
+  def _unload
+  end
+end
+
+
 describe Region do
   include ByteConverter
   include ChunkHelper
@@ -50,6 +57,13 @@ describe Region do
   it "yields the chunk position as a Chunk object" do
     c = region.chunk 0, 0
     blocksAre c, :stone
+  end
+
+  it "can unload chunks to save space" do
+    r = region
+    blocksAre r.chunk(0, 0), :stone
+    r.unloadChunk 0, 0
+    blocksAre r.chunk(0, 0), :stone
   end
 
   it "can write write to a file and read back" do

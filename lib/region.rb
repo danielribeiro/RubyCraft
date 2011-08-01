@@ -32,13 +32,21 @@ class LazyChunkDelegate
     _getchunk.export
   end
 
+
   def toNbt
     return @bytes if @chunk.nil?
     @chunk.toNbt
   end
 
 
-  private
+  # unloacs the loaded chunk. Needed for memory optmization
+  def _unload
+    return if @chunk.nil?
+    @bytes = @chunk.toNbt
+    @chunk = nil
+  end
+
+  protected
   def _getchunk
     if @chunk.nil?
       @chunk = Chunk.fromNbt @bytes
@@ -88,6 +96,10 @@ class Region
     @chunks[z][x]
   end
 
+  def unloadChunk(z, x)
+    @chunks[z][x]._unload
+  end
+
   def each(&block)
     @chunks.each do |line|
       line.each do |chunk|
@@ -114,6 +126,7 @@ class Region
   def exportToFile(filename)
     File.open(filename, "wb") { |f| exportTo f }
   end
+
 
   protected
   def readChunks(bytes)
@@ -224,6 +237,7 @@ class ChunkCube
   protected
   def iterateOverChunk(j, i, &block)
     chunk = @region.chunk(j, i)
+    return if chunk.nil?
     z, x, y = @initialPos
     chunk.each do |b|
       globalZ = b.z + (j * chunkSide)
@@ -234,6 +248,7 @@ class ChunkCube
         yield b, globalZ - z, globalX - x , b.y - y
       end
     end
+    @region.unloadChunk(j, i)
   end
 
   def chunkSide
