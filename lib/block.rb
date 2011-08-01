@@ -2,9 +2,6 @@ require 'block_type'
 
 # A minecraft block. Its position is given by a coord[x, z, y]
 class Block
-  ColorValues = %w[white orange magenta light_blue yellow light_green pink gray
-    light_gray cyan purple blue brown dark_green red black].map &:to_sym
-  InvertedColor = Hash[ColorValues.each_with_index.to_a]
 
   attr_accessor :block_type, :pos, :data
   def initialize(blockType, data = 0)
@@ -26,11 +23,15 @@ class Block
 
 
   def color=(color)
-    @data = InvertedColor[color]
+    @data = BlockColor::InvertedColor[color]
   end
 
   def color
-    ColorValues[@data]
+    BlockColor.typeColor[@data].name
+  end
+
+  def blockColor
+    BlockColor.typeColor[@data]
   end
 
   def is(name)

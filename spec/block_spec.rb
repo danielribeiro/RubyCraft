@@ -13,6 +13,11 @@ describe Block do
     b.color.should == :white
   end
 
+  it "has block colors" do
+    b = Block.of :wool
+    b.blockColor.rgb.should == [221,221,221]
+  end
+
   it "air block is transparent" do
     Block.of(:air).transparent.should == true
     Block.get(0).transparent.should == true

@@ -97,9 +97,60 @@ BlockTypeDSL = proc do
   transparent_block 96, :trapdoor
 end
 
+
+# DSL: color name r, g, b
+BlockColorDSL = proc do
+  white 221, 221, 221
+  orange 233, 126, 55
+  magenta 179, 75, 200
+  light_blue 103, 137, 211
+  yellow 192, 179, 28
+  light_green 59, 187, 47
+  pink 217, 132, 153
+  dark_gray 66, 67, 67
+  gray 157, 164, 165
+  cyan 39, 116, 148
+  purple 128, 53, 195
+  blue 39, 51, 153
+  brown 85, 51, 27
+  dark_green 55, 76, 24
+  red 162, 44, 42
+  black 26, 23, 23
+end
+
+class BlockColor
+  @typeColor = []
+
+  def self.method_missing(name, *args)
+    @typeColor << new(name, *args)
+  end
+
+  def self.typeColor
+    @typeColor
+  end
+
+  attr_reader :name, :r, :g, :b
+  def initialize(name, r, g, b)
+    @name = name
+    @r = r
+    @g = g
+    @b = b
+  end
+
+  def rgb
+    [r, g, b]
+  end
+
+  class_eval &BlockColorDSL
+  InvertedColor = Hash[typeColor.each_with_index.map { |obj, i| [obj.name, i] }]
+end
+
 # class methods and dsl for block
 class BlockType
+  @blocks = {}
+  @blocks_by_name = {}
   attr_reader :id, :name, :transparent
+  
   def initialize(id, name, transparent)
     @id = id
     @name = name.to_s
@@ -107,8 +158,6 @@ class BlockType
   end
 
   def self.block(id, name, transparent = false)
-    @blocks ||= {}
-    @blocks_by_name ||= {}
     block = new id, name, transparent
     @blocks[id] = block
     @blocks_by_name[name.to_s] = block

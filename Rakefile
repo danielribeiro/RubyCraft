@@ -35,3 +35,8 @@ Spec::Rake::SpecTask.new do |t|
   t.spec_files = FileList['spec/**/*spec.rb']
   t.libs << Dir["lib"]
 end
+
+desc "Acceptance test"
+task :atest do
+  require 'spec/acceptanceEdit'
+end

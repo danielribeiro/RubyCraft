@@ -19,9 +19,11 @@ for cx in 0..2
       x = cx * 16 + b.x
       z = cz * 16 + b.z
       y = f(x, z)
-      if b.y == y
+      if b.y <= y
         b.name = :wool
         b.data = (x + z) % 16
+      elsif b.y == y + 1
+        b.name = :redstone_torch_on
       else
         b.name = :air
       end
