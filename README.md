@@ -4,6 +4,8 @@ RubyCraft
 Enables to easily manipulate minecraft region files.
 
 
+Dependencies: [Nbtfile](http://github.com/mental/nbtfile)
+
 Meta
 ----
 
