@@ -1,6 +1,7 @@
 $LOAD_PATH.unshift File.join(File.dirname(__FILE__),'..','lib')
 require 'rubygems'
-require 'block_type'
+require 'rubycraft'
+include RubyCraft
 
 module ColorTopology
   def squaredColorDist(c1, c2)

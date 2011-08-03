@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
 require 'example_helpers'
-require 'region'
 require 'set'
 
 module Plots
