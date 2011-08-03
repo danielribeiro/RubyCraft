@@ -1,5 +1,4 @@
 require 'rspec_helper'
-require 'block'
 
 describe Block do
   it "Blocks that are wool can have their data set by color" do

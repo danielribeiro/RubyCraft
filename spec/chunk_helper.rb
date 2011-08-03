@@ -2,7 +2,7 @@
 
 # Opening Chunk so that we can test with smaller data set (2x2x8 per chunk),
 #instead of 16x16x128 of regular minecraft chunk
-class Chunk
+class RubyCraft::Chunk
   def matrixfromBytes(bytes)
     Matrix3d.new(2, 2, 8).fromArray bytes.map {|byte| Block.get(byte) }
   end

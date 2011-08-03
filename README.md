@@ -2,7 +2,9 @@ RubyCraft
 ==============
 
 RubyCraft is a simple library for manipulating [Minecraft](http://www.minecraft.net/)
-region files.
+region files. Installation is as simple as:
+
+    $ gem install rubycraft
 
 Region files are files with the mcr extension on the region folder of a save folder. The
 save folders are located below the saves folder of the minecraft data folder (for
@@ -19,7 +21,7 @@ Quick Example
         r.exportToFile filename
 
 For more examples, check the
-[examples](https://github.com/danielribeiro/RubyCraft/tree/master/examples) folder
+[examples](https://github.com/danielribeiro/RubyCraft/tree/master/examples) folder.
 
 Regions
 ---------
@@ -57,7 +59,7 @@ Blocks
 Blocks have 3 attributes: block_type, pos and data. [Block type](https://github.com/danielribeiro/RubyCraft/blob/master/lib/block_type.rb) tells the name, id and
 transparency (boolean) of the block. The pos attribute indicates the position of the block
 inside its chunk, and data is the integer [data
-value](http://www.minecraftwiki.net/wiki/Data_values)
+value](http://www.minecraftwiki.net/wiki/Data_values).
 
 Id is not usually accessed directly, as the name attribute provides a more friendly
 interface. For wool blocks, changing the color directly is also possible in a more

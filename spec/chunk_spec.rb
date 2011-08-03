@@ -1,7 +1,6 @@
 require 'rspec_helper'
-require 'chunk'
+require 'rubycraft'
 require 'chunk_helper'
-
 describe Chunk do
   include ByteConverter
   include ChunkHelper

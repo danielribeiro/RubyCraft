@@ -1,5 +1,4 @@
 require 'rspec_helper'
-require 'matrix3d'
 
 
 describe Matrix3d do

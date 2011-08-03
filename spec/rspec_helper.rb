@@ -1,5 +1,8 @@
 #!/usr/bin/env ruby
 $LOAD_PATH.unshift File.join(File.dirname(__FILE__),'..','lib')
+require 'rubycraft'
+include RubyCraft
+
 module RspecExtensions
   # Helper method to handle exceptions
   def raisesException(nameError = Exception, &block)

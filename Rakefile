@@ -6,19 +6,24 @@ require 'rake/rdoctask'
 require 'rake/testtask'
 require 'spec/rake/spectask'
 
-spec = Gem::Specification.new do |s|
-  s.name = 'RubyCraft'
-  s.version = '0.0.1'
-  s.has_rdoc = true
-  s.extra_rdoc_files = ['README', 'LICENSE']
-  s.summary = 'Your summary here'
-  s.description = s.summary
-  s.author = ''
-  s.email = ''
-  # s.executables = ['your_executable_here']
-  s.files = %w(LICENSE README Rakefile) + Dir.glob("{bin,lib,spec}/**/*")
-  s.require_path = "lib"
-  s.bindir = "bin"
+begin
+  require 'jeweler'
+  Jeweler::Tasks.new do |gem|
+    gem.name = "rubycraft"
+    gem.summary = %Q{Lib for manipualting Minecraft world files}
+    gem.description = %Q{It allows you to change all the
+blocks in region files in whatever way you see fit. Example: http://bit.ly/r62qGo}
+    gem.email = "danrbr@gmail.com"
+    gem.homepage = "http://github.com/danielribeiro/RubyCraft"
+    gem.authors = ["Daniel Ribeiro"]
+    gem.add_dependency 'nbtfile', '>=0.2.0'
+    gem.files = FileList["[A-Z]*", "{bin,lib}/**/*"]
+#    gem.add_development_dependency "thoughtbot-shoulda", ">= 0"
+    # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
+  end
+  Jeweler::GemcutterTasks.new
+rescue LoadError
+  puts "Jeweler (or a dependency) not available. Install it with: gem install jeweler"
 end
 
 

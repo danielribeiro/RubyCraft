@@ -2,7 +2,8 @@
 $LOAD_PATH.unshift File.join(File.dirname(__FILE__),'..','lib')
 require 'rubygems'
 require 'fileutils'
-require 'region'
+require 'rubycraft'
+include RubyCraft
 def file(name)
   File.join(File.dirname(__FILE__),'..','fixtures', name)
 end

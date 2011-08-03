@@ -1,18 +1,16 @@
 require 'rspec_helper'
-require 'chunk'
 require 'chunk_helper'
-require 'region'
 
 # Opening Chunk cube so that the chunk sizes are the ones under test.
 # See chunk_helper
-class ChunkCube
+class RubyCraft::ChunkCube
   def chunkSide
     2
   end
 end
 
 # implementing unload for those chunks that are created directly, for testing purposes
-class Chunk
+class RubyCraft::Chunk
   def _unload
   end
 end
