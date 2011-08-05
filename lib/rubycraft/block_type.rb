@@ -90,7 +90,7 @@ module RubyCraft
     block 88, :soulsand
     block 89, :glowstone
     transparent_block 90, :portal
-    block 91, :jock_o_lantern
+    block 91, :jack_o_lantern
     transparent_block 92, :cake
     transparent_block 93, :repeater_off
     transparent_block 94, :repeater_on
