@@ -56,7 +56,7 @@ chunks directly, but get them through Region#chunk method.
 
 Blocks
 ---------
-Blocks have 3 attributes: block_type, pos and data. [Block type](https://github.com/danielribeiro/RubyCraft/blob/master/lib/block_type.rb) tells the name, id and
+Blocks have 3 attributes: block_type, pos and data. [Block type](https://github.com/danielribeiro/RubyCraft/blob/master/lib/rubycraft/block_type.rb) tells the name, id and
 transparency (boolean) of the block. The pos attribute indicates the position of the block
 inside its chunk, and data is the integer [data
 value](http://www.minecraftwiki.net/wiki/Data_values).
