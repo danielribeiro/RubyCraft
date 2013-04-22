@@ -15,7 +15,7 @@ instance, on Linux it is ~/.minecraft/saves/$SAVENAME/region, and on mac it is
 
 What can be done with this?
 --------
-![](https://raw.github.com/danielribeiro/RubyCraft/master/images/plottingOverview.png)
+<a href="http://metaphysicaldeveloper.wordpress.com/2011/07/31/hacking-a-gnuplot-into-minecraft/" target="_blank">![](https://raw.github.com/danielribeiro/RubyCraft/master/images/plottingOverview.png)]</a>
 
 
 
