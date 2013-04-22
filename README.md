@@ -13,6 +13,12 @@ instance, on Linux it is ~/.minecraft/saves/$SAVENAME/region, and on mac it is
 [here](http://www.minecraftwiki.net/wiki/Tutorials/Minecraft_Help_FAQ#Common_fixes).
 
 
+What can be done with this?
+--------
+![](https://raw.github.com/danielribeiro/RubyCraft/master/images/plottingOverview.png)
+
+
+
 Quick Example
 --------
         filename = " ~/.minecraft/saves/$SAVENAME/region/r.0.0.mcr"
