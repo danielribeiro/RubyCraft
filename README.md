@@ -51,12 +51,14 @@ receive a block, or it will return an Enumerable that iterates over the blocks o
 cube. The proc receives four arguments: the block, and its relative coordinates to the
 cube's origin point.
 
-Chunks
----------
+## Chunks
+
 Chunks are both enumerable and indexable:
 
-       chunk[0, 0, 0].name = :gold
-       chunk.each { |block| block.name = :gold }
+```ruby
+chunk[0, 0, 0].name = :gold
+chunk.each { |block| block.name = :gold }
+```
 
 
 Note that chunks have size 16x16x128 (width, length, height). Usually you don't create
